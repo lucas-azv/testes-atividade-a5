@@ -19,6 +19,8 @@ public class ClientResourcesTestsIT {
     @Autowired
     private MockMvc mockMvc;
 
+
+    // Lucas Borges de Azevedo
     @Test
     public void testFindAllShouldReturnPageOfClients() throws Exception {
         mockMvc.perform(get("/clients")
@@ -36,6 +38,7 @@ public class ClientResourcesTestsIT {
                 .andExpect(jsonPath("$.content[0].name").exists());
     }
 
+    // Lucas Borges de Azevedo
     @Test
     public void testFindByIncomeShouldReturnClientsWithSpecifiedIncome() throws Exception {
         Double salarioResultado = 5000.0;
