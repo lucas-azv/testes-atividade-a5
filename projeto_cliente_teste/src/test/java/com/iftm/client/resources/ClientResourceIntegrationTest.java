@@ -76,7 +76,6 @@ public class ClientResourceIntegrationTest {
         int quantidadeLinhasPagina = 12;
 
         // act
-
         ResultActions resultados = mockMVC.perform(get("/clients/").accept(MediaType.APPLICATION_JSON));
 
         // assign
@@ -84,14 +83,21 @@ public class ClientResourceIntegrationTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.content").exists())
                 .andExpect(jsonPath("$.content").isArray())
-                .andExpect(jsonPath("$.content[?(@.id == '%s')]", 7L).exists())
-                .andExpect(jsonPath("$.content[?(@.id == '%s')]", 4L).exists())
-                .andExpect(jsonPath("$.content[?(@.id == '%s')]", 8L).exists())
-                .andExpect(jsonPath("$.content[?(@.name == '%s')]", "Toni Morrison").exists())
                 .andExpect(jsonPath("$.totalElements").exists())
                 .andExpect(jsonPath("$.totalElements").value(quantidadeClientes))
                 .andExpect(jsonPath("$.numberOfElements").exists())
                 .andExpect(jsonPath("$.numberOfElements").value(quantidadeLinhasPagina))
-                .andExpect(jsonPath("$.content[*].id", containsInAnyOrder(4, 10, 3, 1, 6, 5, 12, 7, 2, 11, 8, 9)));
+                .andExpect(jsonPath("$.content[*].id", containsInAnyOrder(4, 10, 3, 1, 6, 5, 12, 7, 2, 11, 8, 9)))
+                .andExpect(jsonPath("$.content[?(@.name == 'Conceição Evaristo')]").exists())
+                .andExpect(jsonPath("$.content[?(@.name == 'Carolina Maria de Jesus')]").exists())
+                .andExpect(jsonPath("$.content[?(@.name == 'Toni Morrison')]").exists())
+                .andExpect(jsonPath("$.content[?(@.cpf == '10619244881')]").exists())
+                .andExpect(jsonPath("$.content[?(@.cpf == '10419244771')]").exists())
+                .andExpect(jsonPath("$.pageable").exists())
+                .andExpect(jsonPath("$.pageable.pageSize").value(12))
+                .andExpect(jsonPath("$.pageable.pageNumber").value(0))
+                .andExpect(jsonPath("$.first").value(true))
+                .andExpect(jsonPath("$.last").value(true));
     }
+
 }
