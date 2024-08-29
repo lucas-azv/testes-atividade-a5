@@ -19,7 +19,6 @@ public class ClientResourcesTestsIT {
     @Autowired
     private MockMvc mockMvc;
 
-
     // Lucas Borges de Azevedo
     @Test
     public void testFindAllShouldReturnPageOfClients() throws Exception {
@@ -57,4 +56,31 @@ public class ClientResourcesTestsIT {
                 .andExpect(jsonPath("$.content[0].name", is("Jose Saramago")))
                 .andExpect(jsonPath("$.content[0].income", is(salarioResultado)));
     }
+
+    // Carlos Eduardo Rangel Lima
+    @Test
+    public void testFindByIncomeGreaterThanShouldReturnClientsAboveSpecifiedIncome() throws Exception {
+        Double salarioMinimo = 4000.0;
+
+        ResultActions result = mockMvc.perform(get("/clients/incomeGreaterThan/")
+                .param("income", String.valueOf(salarioMinimo))
+                .param("page", "0")
+                .param("linesPerPage", "5")
+                .param("direction", "DESC")
+                .param("orderBy", "income")
+                .accept(MediaType.APPLICATION_JSON));
+
+        result.andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.content", hasSize(5)))
+                .andExpect(jsonPath("$.content[0].name", is("Toni Morrison")))
+                .andExpect(jsonPath("$.content[0].income", is(10000.0)))
+                .andExpect(jsonPath("$.content[1].name", is("Carolina Maria de Jesus")))
+                .andExpect(jsonPath("$.content[1].income", is(7500.0)))
+                .andExpect(jsonPath("$.content[2].name", is("Jose Saramago")))
+                .andExpect(jsonPath("$.content[2].income", is(5000.0)))
+                .andExpect(jsonPath("$.content[3].name", is("Silvio Almeida")))
+                .andExpect(jsonPath("$.content[3].income", is(4500.0)));
+    }
+
 }
