@@ -23,9 +23,9 @@ public class ClientResourcesTestsIT {
     @Autowired
     private MockMvc mockMvc;
 
-    //Bruno Vieira
+    // Bruno Vieira
     @Test
-    public void testFindByExistingId() throws Exception{
+    public void testFindByExistingId() throws Exception {
         Long existingId = 7L;
 
         Client client = new Client(existingId, "Jose Saramago", "10239254871", 5000.0, Instant.parse("1996-12-23T07:00:00Z"), 0);
@@ -53,7 +53,6 @@ public class ClientResourcesTestsIT {
                 .andExpect(jsonPath("$.error", is("Resource not found")))
                 .andExpect(jsonPath("$.path", is("/clients/id/33")));
     }
-
 
     // Lucas Borges de Azevedo
     @Test
@@ -117,6 +116,60 @@ public class ClientResourcesTestsIT {
                 .andExpect(jsonPath("$.content[2].income", is(5000.0)))
                 .andExpect(jsonPath("$.content[3].name", is("Silvio Almeida")))
                 .andExpect(jsonPath("$.content[3].income", is(4500.0)));
+    }
+
+    // Vinicius Raphael
+    @Test
+    public void testFindByCpfLikeShouldReturnClientsMatchingCpfPattern() throws Exception {
+        String cpfPattern = "102";
+
+        ResultActions result = mockMvc.perform(get("/clients/cpfLike/")
+                .param("cpf", cpfPattern)
+                .param("page", "0")
+                .param("linesPerPage", "12")
+                .param("direction", "ASC")
+                .param("orderBy", "name")
+                .accept(MediaType.APPLICATION_JSON));
+
+        result.andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.content", hasSize(1)))
+                .andExpect(jsonPath("$.content[0].name", is("Jose Saramago")))
+                .andExpect(jsonPath("$.content[0].cpf", containsString(cpfPattern)));
+    }
+
+    // Vinicius Raphael
+    @Test
+    public void testUpdateShouldReturnUpdatedClient() throws Exception {
+        Long existingId = 7L;
+        String updatedName = "Jose Saramago Updated";
+        Double updatedIncome = 5500.0;
+
+        String jsonBody = "{ \"name\": \"" + updatedName + "\", \"income\": " + updatedIncome + " }";
+
+        ResultActions result = mockMvc.perform(put("/clients/{id}", existingId)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(jsonBody));
+
+        result.andExpect(status().isOk())
+                .andExpect(jsonPath("$.id", is(existingId.intValue())))
+                .andExpect(jsonPath("$.name", is(updatedName)))
+                .andExpect(jsonPath("$.income", is(updatedIncome)));
+    }
+
+    // Vinicius Raphael
+    @Test
+    public void testUpdateShouldReturnNotFoundForNonExistingId() throws Exception {
+        Long nonExistingId = 99L;
+        String jsonBody = "{ \"name\": \"Non Existing Client\", \"income\": 1000.0 }";
+
+        ResultActions result = mockMvc.perform(put("/clients/{id}", nonExistingId)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(jsonBody));
+
+        result.andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.error", is("Resource not found")))
+                .andExpect(jsonPath("$.path", is("/clients/id/99")));
     }
 
 }
