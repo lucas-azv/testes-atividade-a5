@@ -4,6 +4,7 @@ import static org.hamcrest.Matchers.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.iftm.client.dto.ClientDTO;
 import com.iftm.client.entities.Client;
 import org.junit.jupiter.api.Test;
@@ -171,5 +172,40 @@ public class ClientResourcesTestsIT {
                 .andExpect(jsonPath("$.error", is("Resource not found")))
                 .andExpect(jsonPath("$.path", is("/clients/id/99")));
     }
+    
+    // João Vitorino Vieira Neto
+    @Test
+    public void testInsertShouldReturnCreatedAndClient() throws Exception {   
+        ClientDTO clientDTO = new ClientDTO(10L, "João Vitorino", "12345678901", 3000.0, Instant.parse("1985-11-15T07:00:00Z"), 1);
+        String json = objectMapper.writeValueAsString(clientDTO);
+        ResultActions result = mockMvc.perform(post("/clients/")
+                .content(json)
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON));
 
+        result.andExpect(status().isCreated())
+                .andExpect(jsonPath("$.name").value("João Vitorino"))
+                .andExpect(jsonPath("$.cpf").value("12345678901"))
+                .andExpect(jsonPath("$.income").value(3000.0)) 
+                .andExpect(jsonPath("$.children").value(1));
+    }
+
+    // João Vitorino Vieira Neto
+    @Test
+    public void testDeleteShouldReturnNoContentWhenIdExists() throws Exception {
+        Long existingId = 1L;
+
+        ResultActions result = mockMvc.perform(delete("/clients/{id}", existingId)
+                .accept(MediaType.APPLICATION_JSON));
+        result.andExpect(status().isNoContent()); 
+    }
+
+    // João Vitorino Vieira Neto
+    @Test
+    public void testDeleteShouldReturnNotFoundWhenIdDoesNotExist() throws Exception {
+        Long nonExistingId = 100L;
+        ResultActions result = mockMvc.perform(delete("/clients/{id}", nonExistingId)
+                .accept(MediaType.APPLICATION_JSON));
+        result.andExpect(status().isNotFound());
+    }
 }
