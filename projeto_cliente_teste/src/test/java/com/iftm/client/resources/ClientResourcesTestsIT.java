@@ -4,6 +4,8 @@ import static org.hamcrest.Matchers.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
+import com.iftm.client.dto.ClientDTO;
+import com.iftm.client.entities.Client;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -12,12 +14,46 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 
+import java.time.Instant;
+
 @SpringBootTest
 @AutoConfigureMockMvc
 public class ClientResourcesTestsIT {
 
     @Autowired
     private MockMvc mockMvc;
+
+    //Bruno Vieira
+    @Test
+    public void testFindByExistingId() throws Exception{
+        Long existingId = 7L;
+
+        Client client = new Client(existingId, "Jose Saramago", "10239254871", 5000.0, Instant.parse("1996-12-23T07:00:00Z"), 0);
+        ClientDTO clientDTO = new ClientDTO(client);
+
+        ResultActions result = mockMvc.perform(get("/clients/id/{id}", existingId));
+
+        result.andExpect(status().isOk())
+                .andExpect(jsonPath("$.id", is(existingId.intValue())))
+                .andExpect(jsonPath("$.name", is("Jose Saramago")))
+                .andExpect(jsonPath("$.cpf", is("10239254871")))
+                .andExpect(jsonPath("$.income", is(5000.0)))
+                .andExpect(jsonPath("$.birthDate", is("1996-12-23T07:00:00Z")))
+                .andExpect(jsonPath("$.children", is(0)));
+    }
+
+    // Bruno Vieira
+    @Test
+    public void testFindByNonExistingId() throws Exception {
+        Long nonExistingId = 33L;
+
+        ResultActions result = mockMvc.perform(get("/clients/id/{id}", nonExistingId));
+
+        result.andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.error", is("Resource not found")))
+                .andExpect(jsonPath("$.path", is("/clients/id/33")));
+    }
+
 
     // Lucas Borges de Azevedo
     @Test
